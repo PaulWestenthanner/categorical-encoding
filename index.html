@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Category Encoders &mdash; Category Encoders latest documentation</title>
+  <title>Category Encoders &mdash; Category Encoders 2.2.2 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                latest
+                2.2.2
               </div>
             
           
@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="basen.html">BaseN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary.html">Binary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="catboost.html">CatBoost Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glmm.html">Generalized Linear Mixed Model Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hashing.html">Hashing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helmert.html">Helmert Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jamesstein.html">James-Stein Encoder</a></li>
@@ -99,6 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sum.html">Sum Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targetencoder.html">Target Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="woe.html">Weight of Evidence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrapper.html">Wrappers</a></li>
 </ul>
 
             
@@ -170,11 +172,11 @@ techniques. While ordinal, one-hot, and hashing encoders have similar equivalent
 transformers in this library all share a few useful properties:</p>
 <blockquote>
 <div><ul class="simple">
-<li>First-class support for pandas dataframes as an input (and optionally as output)</li>
-<li>Can explicitly configure which columns in the data are encoded by name or index, or infer non-numeric columns regardless of input type</li>
-<li>Can drop any columns with very low variance based on training set optionally</li>
-<li>Portability: train a transformer on data, pickle it, reuse it later and get the same thing out.</li>
-<li>Full compatibility with sklearn pipelines, input an array-like dataset like any other transformer</li>
+<li><p>First-class support for pandas dataframes as an input (and optionally as output)</p></li>
+<li><p>Can explicitly configure which columns in the data are encoded by name or index, or infer non-numeric columns regardless of input type</p></li>
+<li><p>Can drop any columns with very low variance based on training set optionally</p></li>
+<li><p>Portability: train a transformer on data, pickle it, reuse it later and get the same thing out.</p></li>
+<li><p>Full compatibility with sklearn pipelines, input an array-like dataset like any other transformer</p></li>
 </ul>
 </div></blockquote>
 <div class="section" id="usage">
@@ -188,12 +190,13 @@ transformers in this library all share a few useful properties:</p>
 </pre></div>
 </div>
 <p>To use:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">category_encoders</span> <span class="kn">as</span> <span class="nn">ce</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">category_encoders</span> <span class="k">as</span> <span class="nn">ce</span>
 
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">BackwardDifferenceEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">BaseNEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">BinaryEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">CatBoostEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
+<span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">GLMMEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">HashingEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">HelmertEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
 <span class="n">encoder</span> <span class="o">=</span> <span class="n">ce</span><span class="o">.</span><span class="n">JamesSteinEncoder</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
@@ -215,51 +218,23 @@ the cols parameter isn’t passed, every non-numeric column will be converted. S
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="backward_difference.html">Backward Difference Coding</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="basen.html">BaseN</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="catboost.html">CatBoost Encoder</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="hashing.html">Hashing</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="helmert.html">Helmert Coding</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="jamesstein.html">James-Stein Encoder</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="leaveoneout.html">Leave One Out</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="mestimate.html">M-estimate</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="onehot.html">One Hot</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ordinal.html">Ordinal</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="polynomial.html">Polynomial Coding</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="sum.html">Sum Coding</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="targetencoder.html">Target Encoder</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="woe.html">Weight of Evidence</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="backward_difference.html">Backward Difference Coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basen.html">BaseN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="binary.html">Binary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="catboost.html">CatBoost Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glmm.html">Generalized Linear Mixed Model Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hashing.html">Hashing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helmert.html">Helmert Coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jamesstein.html">James-Stein Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="leaveoneout.html">Leave One Out</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mestimate.html">M-estimate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="onehot.html">One Hot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ordinal.html">Ordinal</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polynomial.html">Polynomial Coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sum.html">Sum Coding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="targetencoder.html">Target Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="woe.html">Weight of Evidence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrapper.html">Wrappers</a></li>
 </ul>
 </div>
 </div>
@@ -267,9 +242,9 @@ the cols parameter isn’t passed, every non-numeric column will be converted. S
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
 

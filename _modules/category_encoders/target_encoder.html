@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>category_encoders.target_encoder &mdash; Category Encoders latest documentation</title>
+  <title>category_encoders.target_encoder &mdash; Category Encoders 2.2.2 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                latest
+                2.2.2
               </div>
             
           
@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../basen.html">BaseN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../binary.html">Binary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../catboost.html">CatBoost Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glmm.html">Generalized Linear Mixed Model Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hashing.html">Hashing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helmert.html">Helmert Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../jamesstein.html">James-Stein Encoder</a></li>
@@ -98,6 +99,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sum.html">Sum Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../targetencoder.html">Target Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../woe.html">Weight of Evidence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wrapper.html">Wrappers</a></li>
 </ul>
 
             
@@ -164,14 +166,14 @@
 <span></span><span class="sd">&quot;&quot;&quot;Target Encoder&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="k">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
-<span class="kn">from</span> <span class="nn">category_encoders.ordinal</span> <span class="k">import</span> <span class="n">OrdinalEncoder</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span> <span class="nn">category_encoders.ordinal</span> <span class="kn">import</span> <span class="n">OrdinalEncoder</span>
 <span class="kn">import</span> <span class="nn">category_encoders.utils</span> <span class="k">as</span> <span class="nn">util</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;chappers&#39;</span>
 
 
-<div class="viewcode-block" id="TargetEncoder"><a class="viewcode-back" href="../../targetencoder.html#category_encoders.target_encoder.TargetEncoder">[docs]</a><span class="k">class</span> <span class="nc">TargetEncoder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetEncoder"><a class="viewcode-back" href="../../targetencoder.html#category_encoders.target_encoder.TargetEncoder">[docs]</a><span class="k">class</span> <span class="nc">TargetEncoder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">TransformerWithTargetMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Target encoding for categorical features.</span>
 
 <span class="sd">    For the case of categorical target: features are replaced with a blend of posterior probability of the target</span>
@@ -191,8 +193,10 @@
 <span class="sd">        boolean for whether or not to drop columns with 0 variance.</span>
 <span class="sd">    return_df: bool</span>
 <span class="sd">        boolean for whether to return a pandas DataFrame from transform (otherwise it will be a numpy array).</span>
+<span class="sd">    handle_missing: str</span>
+<span class="sd">        options are &#39;error&#39;, &#39;return_nan&#39;  and &#39;value&#39;, defaults to &#39;value&#39;, which returns the target mean.</span>
 <span class="sd">    handle_unknown: str</span>
-<span class="sd">        options are &#39;error&#39;, &#39;return_nan&#39; and &#39;value&#39;, defaults to &#39;value&#39;, which will impute the target mean.</span>
+<span class="sd">        options are &#39;error&#39;, &#39;return_nan&#39; and &#39;value&#39;, defaults to &#39;value&#39;, which returns the target mean.</span>
 <span class="sd">    min_samples_leaf: int</span>
 <span class="sd">        minimum samples to take category average into account.</span>
 <span class="sd">    smoothing: float</span>
@@ -238,7 +242,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_invariant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_df</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">handle_missing</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_invariant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_df</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">handle_missing</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span>
                      <span class="n">handle_unknown</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">smoothing</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drop_invariant</span> <span class="o">=</span> <span class="n">drop_invariant</span>
@@ -289,7 +293,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_cols_to_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_missing</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">bool</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Columns to be encoded can not contain null&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span> <span class="o">=</span> <span class="n">OrdinalEncoder</span><span class="p">(</span>
@@ -365,7 +369,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_missing</span> <span class="o">==</span> <span class="s1">&#39;error&#39;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">bool</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Columns to be encoded can not contain null&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -384,7 +388,7 @@
             <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The length of X is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; but length of y is &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">X</span>
 
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordinal_encoder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -403,15 +407,6 @@
             <span class="k">return</span> <span class="n">X</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">values</span></div>
-
-<div class="viewcode-block" id="TargetEncoder.fit_transform"><a class="viewcode-back" href="../../targetencoder.html#category_encoders.target_encoder.TargetEncoder.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Encoders that utilize the target must make sure that the training data are transformed with:</span>
-<span class="sd">             transform(X, y)</span>
-<span class="sd">        and not with:</span>
-<span class="sd">            transform(X)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">target_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_in</span><span class="p">):</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">X_in</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

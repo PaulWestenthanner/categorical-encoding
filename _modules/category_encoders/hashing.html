@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>category_encoders.hashing &mdash; Category Encoders latest documentation</title>
+  <title>category_encoders.hashing &mdash; Category Encoders 2.2.2 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../../_static/jquery.js"></script>
-        <script type="text/javascript" src="../../_static/underscore.js"></script>
-        <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                latest
+                2.2.2
               </div>
             
           
@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../basen.html">BaseN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../binary.html">Binary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../catboost.html">CatBoost Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glmm.html">Generalized Linear Mixed Model Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hashing.html">Hashing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helmert.html">Helmert Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../jamesstein.html">James-Stein Encoder</a></li>
@@ -98,6 +99,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sum.html">Sum Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../targetencoder.html">Target Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../woe.html">Weight of Evidence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../wrapper.html">Wrappers</a></li>
 </ul>
 
             
@@ -165,19 +167,30 @@
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="k">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span>
 <span class="kn">import</span> <span class="nn">category_encoders.utils</span> <span class="k">as</span> <span class="nn">util</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">platform</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;willmcginnis&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;willmcginnis&#39;</span><span class="p">,</span> <span class="s1">&#39;LiuShulun&#39;</span>
 
 
 <div class="viewcode-block" id="HashingEncoder"><a class="viewcode-back" href="../../hashing.html#category_encoders.hashing.HashingEncoder">[docs]</a><span class="k">class</span> <span class="nc">HashingEncoder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">TransformerMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A basic multivariate hashing implementation with configurable dimensionality/precision.</span>
+
+    <span class="sd">&quot;&quot;&quot; A multivariate hashing implementation with configurable dimensionality/precision.</span>
 
 <span class="sd">    The advantage of this encoder is that it does not maintain a dictionary of observed categories.</span>
 <span class="sd">    Consequently, the encoder does not grow in size and accepts new values during data scoring</span>
 <span class="sd">    by design.</span>
+
+<span class="sd">    It&#39;s important to read about how max_process &amp; max_sample work</span>
+<span class="sd">    before setting them manually, inappropriate setting slows down encoding.</span>
+
+<span class="sd">    Default value of &#39;max_process&#39; is 1 on Windows because multiprocessing might cause issues, see in :</span>
+<span class="sd">    https://github.com/scikit-learn-contrib/categorical-encoding/issues/215</span>
+<span class="sd">    https://docs.python.org/2/library/multiprocessing.html?highlight=process#windows</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -192,18 +205,35 @@
 <span class="sd">        boolean for whether to return a pandas DataFrame from transform (otherwise it will be a numpy array).</span>
 <span class="sd">    hash_method: str</span>
 <span class="sd">        which hashing method to use. Any method from hashlib works.</span>
+<span class="sd">    max_process: int</span>
+<span class="sd">        how many processes to use in transform(). Limited in range(1, 64).</span>
+<span class="sd">        By default, it uses half of the logical CPUs.</span>
+<span class="sd">        For example, 4C4T makes max_process=2, 4C8T makes max_process=4.</span>
+<span class="sd">        Set it larger if you have a strong CPU.</span>
+<span class="sd">        It is not recommended to set it larger than is the count of the</span>
+<span class="sd">        logical CPUs as it will actually slow down the encoding.</span>
+<span class="sd">    max_sample: int</span>
+<span class="sd">        how many samples to encode by each process at a time.</span>
+<span class="sd">        This setting is useful on low memory machines.</span>
+<span class="sd">        By default, max_sample=(all samples num)/(max_process).</span>
+<span class="sd">        For example, 4C8T CPU with 100,000 samples makes max_sample=25,000,</span>
+<span class="sd">        6C12T CPU with 100,000 samples makes max_sample=16,666.</span>
+<span class="sd">        It is not recommended to set it larger than the default value.</span>
+<span class="sd">    n_components: int</span>
+<span class="sd">        how many bits to use to represent the feature. By default we use 8 bits.</span>
+<span class="sd">        For high-cardinality features, consider using up-to 32 bits.</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
-<span class="sd">    &gt;&gt;&gt; from category_encoders import *</span>
+<span class="sd">    &gt;&gt;&gt; from category_encoders.hashing import HashingEncoder</span>
 <span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
 <span class="sd">    &gt;&gt;&gt; from sklearn.datasets import load_boston</span>
 <span class="sd">    &gt;&gt;&gt; bunch = load_boston()</span>
-<span class="sd">    &gt;&gt;&gt; y = bunch.target</span>
 <span class="sd">    &gt;&gt;&gt; X = pd.DataFrame(bunch.data, columns=bunch.feature_names)</span>
-<span class="sd">    &gt;&gt;&gt; enc = HashingEncoder(cols=[&#39;CHAS&#39;, &#39;RAD&#39;]).fit(X, y)</span>
-<span class="sd">    &gt;&gt;&gt; numeric_dataset = enc.transform(X)</span>
-<span class="sd">    &gt;&gt;&gt; print(numeric_dataset.info())</span>
+<span class="sd">    &gt;&gt;&gt; y = bunch.target</span>
+<span class="sd">    &gt;&gt;&gt; he = HashingEncoder(cols=[&#39;CHAS&#39;, &#39;RAD&#39;]).fit(X, y)</span>
+<span class="sd">    &gt;&gt;&gt; data = he.transform(X)</span>
+<span class="sd">    &gt;&gt;&gt; print(data.info())</span>
 <span class="sd">    &lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;</span>
 <span class="sd">    RangeIndex: 506 entries, 0 to 505</span>
 <span class="sd">    Data columns (total 19 columns):</span>
@@ -234,10 +264,29 @@
 <span class="sd">    ----------</span>
 <span class="sd">    .. [1] Feature Hashing for Large Scale Multitask Learning, from</span>
 <span class="sd">    https://alex.smola.org/papers/2009/Weinbergeretal09.pdf</span>
+<span class="sd">    .. [2] Don&#39;t be tricked by the Hashing Trick, from</span>
+<span class="sd">    https://booking.ai/dont-be-tricked-by-the-hashing-trick-192a6aae3087</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_invariant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_df</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hash_method</span><span class="o">=</span><span class="s1">&#39;md5&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_process</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_sample</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_components</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop_invariant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_df</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hash_method</span><span class="o">=</span><span class="s1">&#39;md5&#39;</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">max_process</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">128</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span> <span class="o">==</span> <span class="s1">&#39;Windows&#39;</span><span class="p">:</span>
+                <span class="n">max_process</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">&gt;</span> <span class="mi">128</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">=</span> <span class="n">max_process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_sample</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auto_sample</span> <span class="o">=</span> <span class="n">max_sample</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">return_df</span> <span class="o">=</span> <span class="n">return_df</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drop_invariant</span> <span class="o">=</span> <span class="n">drop_invariant</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drop_cols</span> <span class="o">=</span> <span class="p">[]</span>
@@ -296,7 +345,100 @@
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">require_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_lock</span><span class="p">,</span> <span class="n">new_start</span><span class="p">,</span> <span class="n">done_index</span><span class="p">,</span> <span class="n">hashing_parts</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">process_index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">new_start</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="n">end_index</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">new_start</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">end_index</span> <span class="o">=</span> <span class="n">done_index</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">end_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span><span class="p">]):</span>
+                <span class="n">start_index</span> <span class="o">=</span> <span class="n">end_index</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span> <span class="o">-</span> <span class="n">end_index</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span><span class="p">:</span>
+                    <span class="n">end_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">end_index</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span>
+                <span class="n">done_index</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">end_index</span>
+                <span class="n">data_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+                <span class="n">data_part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span> <span class="n">end_index</span><span class="p">]</span>
+                <span class="c1"># Always get df and check it after merge all data parts</span>
+                <span class="n">data_part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hashing_trick</span><span class="p">(</span><span class="n">X_in</span><span class="o">=</span><span class="n">data_part</span><span class="p">,</span> <span class="n">hashing_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hash_method</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_invariant</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_cols</span><span class="p">:</span>
+                        <span class="n">data_part</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">part_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">end_index</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span><span class="p">))</span>
+                <span class="n">hashing_parts</span><span class="o">.</span><span class="n">put</span><span class="p">({</span><span class="n">part_index</span><span class="p">:</span> <span class="n">data_part</span><span class="p">})</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Process - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_index</span><span class="p">),</span>
+                          <span class="s2">&quot;done hashing data : &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;~&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_index</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">end_index</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">require_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_lock</span><span class="p">,</span> <span class="n">new_start</span><span class="p">,</span> <span class="n">done_index</span><span class="p">,</span> <span class="n">hashing_parts</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">process_index</span><span class="o">=</span><span class="n">process_index</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
 <div class="viewcode-block" id="HashingEncoder.transform"><a class="viewcode-back" href="../../hashing.html#category_encoders.hashing.HashingEncoder.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">override_return_df</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Call _transform() if you want to use single CPU with all samples</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Must train encoder before it can be used to transform data.&#39;</span><span class="p">)</span>
+
+        <span class="c1"># first check the type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_input</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># then make sure that it is the right size</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unexpected input dimension </span><span class="si">%d</span><span class="s1">, expected </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">,</span> <span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span>
+
+        <span class="n">data_lock</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+        <span class="n">new_start</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">done_index</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">hashing_parts</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto_sample</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_process</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">require_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_lock</span><span class="p">,</span> <span class="n">new_start</span><span class="p">,</span> <span class="n">done_index</span><span class="p">,</span> <span class="n">hashing_parts</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span> <span class="n">process_index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_process</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">thread_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_process</span><span class="p">):</span>
+                <span class="n">process</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">require_data</span><span class="p">,</span>
+                                                  <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_lock</span><span class="p">,</span> <span class="n">new_start</span><span class="p">,</span> <span class="n">done_index</span><span class="p">,</span> <span class="n">hashing_parts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span> <span class="n">thread_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">process</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">n_process</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">n_process</span><span class="p">:</span>
+                <span class="n">process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">n_process</span><span class="p">:</span>
+                <span class="n">process</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sample</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hashing_parts</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hashing_parts</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">list_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">hashing_parts</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+                <span class="n">list_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hashing_parts</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+            <span class="n">sort_data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">part_index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">list_data</span><span class="p">):</span>
+                <span class="n">sort_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_data</span><span class="p">[</span><span class="n">part_index</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">sort_data</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">sort_data</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Check if is_return_df</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_df</span> <span class="ow">or</span> <span class="n">override_return_df</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span></div>
+
+    <span class="k">def</span> <span class="nf">_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">override_return_df</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Perform the transformation to new categorical data.</span>
 
 <span class="sd">        Parameters</span>
@@ -322,7 +464,7 @@
         <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unexpected input dimension </span><span class="si">%d</span><span class="s1">, expected </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">,</span> <span class="p">))</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">X</span>
 
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hashing_trick</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">hashing_method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hash_method</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_components</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
@@ -334,7 +476,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_df</span> <span class="ow">or</span> <span class="n">override_return_df</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">X</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">values</span></div>
+            <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">values</span>
 
 <div class="viewcode-block" id="HashingEncoder.hashing_trick"><a class="viewcode-back" href="../../hashing.html#category_encoders.hashing.HashingEncoder.hashing_trick">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">hashing_trick</span><span class="p">(</span><span class="n">X_in</span><span class="p">,</span> <span class="n">hashing_method</span><span class="o">=</span><span class="s1">&#39;md5&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>

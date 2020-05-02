@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>James-Stein Encoder &mdash; Category Encoders latest documentation</title>
+  <title>James-Stein Encoder &mdash; Category Encoders 2.2.2 documentation</title>
   
 
   
@@ -21,10 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -34,7 +34,9 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Leave One Out" href="leaveoneout.html" />
+    <link rel="prev" title="Helmert Coding" href="helmert.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -58,7 +60,7 @@
             
             
               <div class="version">
-                latest
+                2.2.2
               </div>
             
           
@@ -87,11 +89,10 @@
 <li class="toctree-l1"><a class="reference internal" href="basen.html">BaseN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binary.html">Binary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="catboost.html">CatBoost Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glmm.html">Generalized Linear Mixed Model Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hashing.html">Hashing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="helmert.html">Helmert Coding</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">James-Stein Encoder</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">James-Stein Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="leaveoneout.html">Leave One Out</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mestimate.html">M-estimate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="onehot.html">One Hot</a></li>
@@ -100,6 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sum.html">Sum Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="targetencoder.html">Target Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="woe.html">Weight of Evidence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wrapper.html">Wrappers</a></li>
 </ul>
 
             
@@ -168,13 +170,13 @@
 <h1>James-Stein Encoder<a class="headerlink" href="#james-stein-encoder" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="category_encoders.james_stein.JamesSteinEncoder">
-<em class="property">class </em><code class="descclassname">category_encoders.james_stein.</code><code class="descname">JamesSteinEncoder</code><span class="sig-paren">(</span><em>verbose=0</em>, <em>cols=None</em>, <em>drop_invariant=False</em>, <em>return_df=True</em>, <em>handle_unknown='value'</em>, <em>handle_missing='value'</em>, <em>model='independent'</em>, <em>random_state=None</em>, <em>randomized=False</em>, <em>sigma=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">category_encoders.james_stein.</code><code class="sig-name descname">JamesSteinEncoder</code><span class="sig-paren">(</span><em class="sig-param">verbose=0</em>, <em class="sig-param">cols=None</em>, <em class="sig-param">drop_invariant=False</em>, <em class="sig-param">return_df=True</em>, <em class="sig-param">handle_unknown='value'</em>, <em class="sig-param">handle_missing='value'</em>, <em class="sig-param">model='independent'</em>, <em class="sig-param">random_state=None</em>, <em class="sig-param">randomized=False</em>, <em class="sig-param">sigma=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>James-Stein estimator.</p>
 <p>For feature value <cite>i</cite>, James-Stein estimator returns a weighted average of:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>The mean target value for the observed feature value <cite>i</cite>.</li>
-<li>The mean target value (regardless of the feature value).</li>
+<li><p>The mean target value for the observed feature value <cite>i</cite>.</p></li>
+<li><p>The mean target value (regardless of the feature value).</p></li>
 </ol>
 </div></blockquote>
 <p>This can be written as:</p>
@@ -218,194 +220,146 @@ with log-odds ratio:</p>
 tricky and sometimes it fails fatally. In these situations, it is better to use beta
 model, which generally delivers slightly worse accuracy than binary model but does
 not suffer from fatal failures.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>verbose: int</strong></dt>
-<dd><p class="first last">integer indicating verbosity of the output. 0 for none.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>verbose: int</strong></dt><dd><p>integer indicating verbosity of the output. 0 for none.</p>
 </dd>
-<dt><strong>cols: list</strong></dt>
-<dd><p class="first last">a list of columns to encode, if None, all string columns will be encoded.</p>
+<dt><strong>cols: list</strong></dt><dd><p>a list of columns to encode, if None, all string columns will be encoded.</p>
 </dd>
-<dt><strong>drop_invariant: bool</strong></dt>
-<dd><p class="first last">boolean for whether or not to drop encoded columns with 0 variance.</p>
+<dt><strong>drop_invariant: bool</strong></dt><dd><p>boolean for whether or not to drop encoded columns with 0 variance.</p>
 </dd>
-<dt><strong>return_df: bool</strong></dt>
-<dd><p class="first last">boolean for whether to return a pandas DataFrame from transform (otherwise it will be a numpy array).</p>
+<dt><strong>return_df: bool</strong></dt><dd><p>boolean for whether to return a pandas DataFrame from transform (otherwise it will be a numpy array).</p>
 </dd>
-<dt><strong>handle_missing: str</strong></dt>
-<dd><p class="first last">options are ‘return_nan’, ‘error’ and ‘value’, defaults to ‘value’, which returns the prior probability.</p>
+<dt><strong>handle_missing: str</strong></dt><dd><p>options are ‘return_nan’, ‘error’ and ‘value’, defaults to ‘value’, which returns the prior probability.</p>
 </dd>
-<dt><strong>handle_unknown: str</strong></dt>
-<dd><p class="first last">options are ‘return_nan’, ‘error’ and ‘value’, defaults to ‘value’, which returns the prior probability.</p>
+<dt><strong>handle_unknown: str</strong></dt><dd><p>options are ‘return_nan’, ‘error’ and ‘value’, defaults to ‘value’, which returns the prior probability.</p>
 </dd>
-<dt><strong>model: str</strong></dt>
-<dd><p class="first last">options are ‘pooled’, ‘beta’, ‘binary’ and ‘independent’, defaults to ‘independent’.</p>
+<dt><strong>model: str</strong></dt><dd><p>options are ‘pooled’, ‘beta’, ‘binary’ and ‘independent’, defaults to ‘independent’.</p>
 </dd>
-<dt><strong>randomized: bool,</strong></dt>
-<dd><p class="first last">adds normal (Gaussian) distribution noise into training data in order to decrease overfitting (testing data are untouched).</p>
+<dt><strong>randomized: bool,</strong></dt><dd><p>adds normal (Gaussian) distribution noise into training data in order to decrease overfitting (testing data are untouched).</p>
 </dd>
-<dt><strong>sigma: float</strong></dt>
-<dd><p class="first last">standard deviation (spread or “width”) of the normal distribution.</p>
+<dt><strong>sigma: float</strong></dt><dd><p>standard deviation (spread or “width”) of the normal distribution.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r50705e07df56-1" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[R50705e07df56-1]</td><td>Parametric empirical Bayes inference: Theory and applications, equations 1.19 &amp; 1.20, from</td></tr>
-</tbody>
-</table>
+<dl class="citation">
+<dt class="label" id="r50705e07df56-1"><span class="brackets">R50705e07df56-1</span></dt>
+<dd><p>Parametric empirical Bayes inference: Theory and applications, equations 1.19 &amp; 1.20, from</p>
+</dd>
+</dl>
 <p><a class="reference external" href="https://www.jstor.org/stable/2287098">https://www.jstor.org/stable/2287098</a></p>
-<table class="docutils citation" frame="void" id="r50705e07df56-2" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[R50705e07df56-2]</td><td>Empirical Bayes for multiple sample sizes, from</td></tr>
-</tbody>
-</table>
+<dl class="citation">
+<dt class="label" id="r50705e07df56-2"><span class="brackets">R50705e07df56-2</span></dt>
+<dd><p>Empirical Bayes for multiple sample sizes, from</p>
+</dd>
+</dl>
 <p><a class="reference external" href="http://chris-said.io/2017/05/03/empirical-bayes-for-multiple-sample-sizes/">http://chris-said.io/2017/05/03/empirical-bayes-for-multiple-sample-sizes/</a></p>
-<table class="docutils citation" frame="void" id="r50705e07df56-3" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[R50705e07df56-3]</td><td>Shrinkage Estimation of Log-odds Ratios for Comparing Mobility Tables, from</td></tr>
-</tbody>
-</table>
+<dl class="citation">
+<dt class="label" id="r50705e07df56-3"><span class="brackets">R50705e07df56-3</span></dt>
+<dd><p>Shrinkage Estimation of Log-odds Ratios for Comparing Mobility Tables, from</p>
+</dd>
+</dl>
 <p><a class="reference external" href="https://journals.sagepub.com/doi/abs/10.1177/0081175015570097">https://journals.sagepub.com/doi/abs/10.1177/0081175015570097</a></p>
-<table class="docutils citation" frame="void" id="r50705e07df56-4" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[R50705e07df56-4]</td><td>Stein’s paradox and group rationality, from</td></tr>
-</tbody>
-</table>
+<dl class="citation">
+<dt class="label" id="r50705e07df56-4"><span class="brackets">R50705e07df56-4</span></dt>
+<dd><p>Stein’s paradox and group rationality, from</p>
+</dd>
+</dl>
 <p><a class="reference external" href="http://www.philos.rug.nl/~romeyn/presentation/">http://www.philos.rug.nl/~romeyn/presentation/</a><a href="#id6"><span class="problematic" id="id7">2017_romeijn_</span></a>-_Paris_Stein.pdf</p>
-<table class="docutils citation" frame="void" id="r50705e07df56-5" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[R50705e07df56-5]</td><td>Stein’s Paradox in Statistics, from</td></tr>
-</tbody>
-</table>
+<dl class="citation">
+<dt class="label" id="r50705e07df56-5"><span class="brackets">R50705e07df56-5</span></dt>
+<dd><p>Stein’s Paradox in Statistics, from</p>
+</dd>
+</dl>
 <p><a class="reference external" href="http://statweb.stanford.edu/~ckirby/brad/other/Article1977.pdf">http://statweb.stanford.edu/~ckirby/brad/other/Article1977.pdf</a></p>
 <p class="rubric">Methods</p>
-<table border="1" class="longtable docutils">
+<table class="longtable docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="90%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.fit" title="category_encoders.james_stein.JamesSteinEncoder.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(self,&nbsp;X,&nbsp;y,&nbsp;\*\*kwargs)</td>
-<td>Fit encoder according to X and binary y.</td>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.fit" title="category_encoders.james_stein.JamesSteinEncoder.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(self, X, y, \*\*kwargs)</p></td>
+<td><p>Fit encoder according to X and binary y.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.fit_transform" title="category_encoders.james_stein.JamesSteinEncoder.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a>(self,&nbsp;X[,&nbsp;y])</td>
-<td>Encoders that utilize the target must make sure that the training data are transformed with:</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code>(self, X[, y])</p></td>
+<td><p>Encoders that utilize the target must make sure that the training data are transformed with:</p></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.get_feature_names" title="category_encoders.james_stein.JamesSteinEncoder.get_feature_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_feature_names</span></code></a>(self)</td>
-<td>Returns the names of all transformed / added columns.</td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.get_feature_names" title="category_encoders.james_stein.JamesSteinEncoder.get_feature_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_feature_names</span></code></a>(self)</p></td>
+<td><p>Returns the names of all transformed / added columns.</p></td>
 </tr>
-<tr class="row-even"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>(self[,&nbsp;deep])</td>
-<td>Get parameters for this estimator.</td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_params</span></code>(self[, deep])</p></td>
+<td><p>Get parameters for this estimator.</p></td>
 </tr>
-<tr class="row-odd"><td><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(self,&nbsp;\*\*params)</td>
-<td>Set the parameters of this estimator.</td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_params</span></code>(self, \*\*params)</p></td>
+<td><p>Set the parameters of this estimator.</p></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.transform" title="category_encoders.james_stein.JamesSteinEncoder.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(self,&nbsp;X[,&nbsp;y,&nbsp;override_return_df])</td>
-<td>Perform the transformation to new categorical data.</td>
+<tr class="row-even"><td><p><a class="reference internal" href="#category_encoders.james_stein.JamesSteinEncoder.transform" title="category_encoders.james_stein.JamesSteinEncoder.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(self, X[, y, override_return_df])</p></td>
+<td><p>Perform the transformation to new categorical data.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="category_encoders.james_stein.JamesSteinEncoder.fit">
-<code class="descname">fit</code><span class="sig-paren">(</span><em>self</em>, <em>X</em>, <em>y</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit encoder according to X and binary y.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples, n_features]</span></dt>
-<dd><p class="first last">Training vectors, where n_samples is the number of samples
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">array-like, shape = [n_samples, n_features]</span></dt><dd><p>Training vectors, where n_samples is the number of samples
 and n_features is the number of features.</p>
 </dd>
-<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples]</span></dt>
-<dd><p class="first last">Binary target values.</p>
+<dt><strong>y</strong><span class="classifier">array-like, shape = [n_samples]</span></dt><dd><p>Binary target values.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>self</strong> <span class="classifier-delimiter">:</span> <span class="classifier">encoder</span></dt>
-<dd><p class="first last">Returns self.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>self</strong><span class="classifier">encoder</span></dt><dd><p>Returns self.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="category_encoders.james_stein.JamesSteinEncoder.fit_transform">
-<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>self</em>, <em>X</em>, <em>y=None</em>, <em>**fit_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.fit_transform" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Encoders that utilize the target must make sure that the training data are transformed with:</dt>
-<dd>transform(X, y)</dd>
-<dt>and not with:</dt>
-<dd>transform(X)</dd>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="category_encoders.james_stein.JamesSteinEncoder.get_feature_names">
-<code class="descname">get_feature_names</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.get_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.get_feature_names" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_feature_names</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.get_feature_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.get_feature_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the names of all transformed / added columns.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt>feature_names: list</dt>
-<dd><p class="first last">A list with all feature names transformed or added.
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>feature_names: list</dt><dd><p>A list with all feature names transformed or added.
 Note: potentially dropped features are not included!</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="category_encoders.james_stein.JamesSteinEncoder.transform">
-<code class="descname">transform</code><span class="sig-paren">(</span><em>self</em>, <em>X</em>, <em>y=None</em>, <em>override_return_df=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">X</em>, <em class="sig-param">y=None</em>, <em class="sig-param">override_return_df=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/category_encoders/james_stein.html#JamesSteinEncoder.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#category_encoders.james_stein.JamesSteinEncoder.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform the transformation to new categorical data. When the data are used for model training,
 it is important to also pass the target in order to apply leave one out.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><strong>X</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples, n_features]</span></dt>
-<dd></dd>
-<dt><strong>y</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array-like, shape = [n_samples] when transform by leave one out</span></dt>
-<dd><p class="first last">None, when transform without target information (such as transform test set)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">array-like, shape = [n_samples, n_features]</span></dt><dd></dd>
+<dt><strong>y</strong><span class="classifier">array-like, shape = [n_samples] when transform by leave one out</span></dt><dd><p>None, when transform without target information (such as transform test set)</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt><strong>p</strong> <span class="classifier-delimiter">:</span> <span class="classifier">array, shape = [n_samples, n_numeric + N]</span></dt>
-<dd><p class="first last">Transformed values with encoding applied.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>p</strong><span class="classifier">array, shape = [n_samples, n_numeric + N]</span></dt><dd><p>Transformed values with encoding applied.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -417,6 +371,15 @@ it is important to also pass the target in order to apply leave one out.</p>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="leaveoneout.html" class="btn btn-neutral float-right" title="Leave One Out" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="helmert.html" class="btn btn-neutral float-left" title="Helmert Coding" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
