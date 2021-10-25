@@ -1,69 +1,33 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>category_encoders.james_stein &mdash; Category Encoders 2.2.2 documentation</title>
-  
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>category_encoders.james_stein &mdash; Category Encoders 2.3.0 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> Category Encoders
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                2.2.2
+                2.3.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -71,22 +35,13 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../backward_difference.html">Backward Difference Coding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../basen.html">BaseN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../binary.html">Binary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../catboost.html">CatBoost Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../count.html">Count Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../glmm.html">Generalized Linear Mixed Model Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hashing.html">Hashing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helmert.html">Helmert Coding</a></li>
@@ -100,68 +55,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../../targetencoder.html">Target Encoder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../woe.html">Weight of Evidence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../wrapper.html">Wrappers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quantile.html">Quantile Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../summary.html">Summary Encoder</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Category Encoders</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>category_encoders.james_stein</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for category_encoders.james_stein</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;James-Stein&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -178,6 +99,8 @@
 
 <div class="viewcode-block" id="JamesSteinEncoder"><a class="viewcode-back" href="../../jamesstein.html#category_encoders.james_stein.JamesSteinEncoder">[docs]</a><span class="k">class</span> <span class="nc">JamesSteinEncoder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">TransformerWithTargetMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;James-Stein estimator.</span>
+
+<span class="sd">    Supported targets: binomial and continuous. For polynomial target support, see PolynomialWrapper.</span>
 
 <span class="sd">    For feature value `i`, James-Stein estimator returns a weighted average of:</span>
 
@@ -758,42 +681,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2016, Will McGinnis
-
-    </p>
+    <p>&#169; Copyright 2016, Will McGinnis.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
