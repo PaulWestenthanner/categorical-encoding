@@ -312,8 +312,7 @@ class TargetEncoder( util.SupervisedTransformerMixin,util.BaseEncoder):
         # sigmoid in this case, using scipy.expit for numerical stability
         return expit((n - self.min_samples_leaf) / self.smoothing)
 
-    def _generate_inverted_hierarchy(self) -> tuple[dict | pd.DataFrame, dict]:
-        # @ToDo create a function to check the hierarchy
+    def _generate_inverted_hierarchy(self) -> tuple[dict | pd.DataFrame | None, dict]:
         if isinstance(self.hierarchy, (dict, pd.DataFrame)) and self.cols is None:
             raise ValueError('Hierarchy is defined but no columns are named for encoding')
         if isinstance(self.hierarchy, dict):

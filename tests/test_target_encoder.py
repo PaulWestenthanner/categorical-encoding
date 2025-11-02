@@ -507,7 +507,7 @@ class TestTargetEncoder(TestCase):
         with self.assertRaises(ValueError):
             enc.fit_transform(X, y)
 
-    def test_hierarchy_with_scikit_learn_column_transformer(self):
+    def test_hierarchy_with_scikit_learn_column_transformer(self) -> None:
         """Test that the encoder works with a scikit-learn ColumnTransformer."""
         features: list[str] = ["cat_feature", "int_feature"]
         target: str = "target"
